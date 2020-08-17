@@ -4,6 +4,7 @@ using ECommerce.Entities.Order;
 using ECommerce.WebApi.Filters.Order;
 using ECommerce.WebApi.Models;
 using ECommerce.WebApi.Models.Order;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,23 +13,20 @@ namespace ECommerce.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
     public class ShoppingCartItemController : ControllerBase
     {
         private readonly IShoppingCartItemService _shoppingCartItemService;
         private readonly IProductService _productService;
-        //private UserManager<Customer> _userManager;
 
-        public ShoppingCartItemController(IShoppingCartItemService shoppingCartItemService, IProductService productService/*, UserManager<Customer> userManager*/)
+        public ShoppingCartItemController(IShoppingCartItemService shoppingCartItemService, IProductService productService)
         {
             _shoppingCartItemService = shoppingCartItemService;
             _productService = productService;
-            //_userManager = userManager;
         }
 
         [HttpGet]
         [ShoppingCartItemException]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
         //tüm kullanıcılara ait sepetler
         public IActionResult Get()
         {
@@ -44,21 +42,11 @@ namespace ECommerce.WebApi.Controllers
 
         [HttpGet("{customerUsername}")]
         [ShoppingCartItemException]
-        //[Authorize(Roles = "admin, customer")]
+        [Authorize(Roles = "admin, customer")]
         //ilgili kullanıcıya ait sepet
         public IActionResult Get(string customerUsername)
         {
             ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
-
-            //var customer = _userManager.FindByNameAsync(customerUsername);
-
-            //if (customer == null)
-            //{
-            //    response.HasError = true;
-            //    response.Errors.Add("Customer Does Not Exist!");
-
-            //    return BadRequest(response);
-            //}
 
             response.Entities = _shoppingCartItemService.GetEx(s => s.CustomerUserName == customerUsername);
             response.IsSuccess = true;
@@ -69,21 +57,11 @@ namespace ECommerce.WebApi.Controllers
         [HttpPost]
         [ShoppingCartItemException]
         [ShoppingCartItemValidate]
-        //[Authorize(Roles = "admin, customer")]
+        [Authorize(Roles = "admin, customer")]
         //sepete ürün ekleme
         public IActionResult Post([FromBody] ShoppingCartItemModel model)
         {
             ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
-
-            //var customer = _userManager.FindByNameAsync(customerUsername);
-
-            //if (customer == null)
-            //{
-            //    response.HasError = true;
-            //    response.Errors.Add("Customer Does Not Exist!");
-
-            //    return BadRequest(response);
-            //}
 
             var selectedProduct = _productService.GetById(model.ProductId);
 
@@ -134,7 +112,7 @@ namespace ECommerce.WebApi.Controllers
         [HttpPut]
         [ShoppingCartItemException]
         [ShoppingCartItemValidate]
-        //[Authorize(Roles = "admin, customer")]
+        [Authorize(Roles = "admin, customer")]
         //sepetten ürün çıkarma
         public IActionResult Put(int id, [FromBody] ShoppingCartItemModel model)
         {
@@ -177,21 +155,11 @@ namespace ECommerce.WebApi.Controllers
 
         [HttpDelete]
         [ShoppingCartItemException]
-        //[Authorize(Roles = "admin, customer")]
+        [Authorize(Roles = "admin, customer")]
         //sepeti boşaltma
         public IActionResult Delete(string customerUsername)
         {
             ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
-
-            //var customer = _userManager.FindByNameAsync(customerUsername);
-
-            //if (customer == null)
-            //{
-            //    response.HasError = true;
-            //    response.Errors.Add("Customer Does Not Exist!");
-
-            //    return BadRequest(response);
-            //}
 
             List<ShoppingCartItem> shoppingCartItem = _shoppingCartItemService.GetEx(s => s.CustomerUserName == customerUsername).ToList();
 

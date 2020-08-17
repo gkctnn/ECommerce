@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommerce.DataAccess", "ECo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommerce.Entities", "ECommerce.Entities\ECommerce.Entities.csproj", "{942DFE1D-EBD4-405B-94AE-CBA22D3D6E07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerce.WebApi", "ECommerce.WebApi\ECommerce.WebApi.csproj", "{E257D496-85DF-47CA-AB2F-97C150FCF1AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommerce.WebApi", "ECommerce.WebApi\ECommerce.WebApi.csproj", "{E257D496-85DF-47CA-AB2F-97C150FCF1AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

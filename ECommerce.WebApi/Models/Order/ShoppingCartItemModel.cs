@@ -1,5 +1,4 @@
-﻿using ECommerce.Entities.Domain.Catalog;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ECommerce.WebApi.Models.Order
 {

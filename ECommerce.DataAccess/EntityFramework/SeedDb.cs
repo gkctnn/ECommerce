@@ -77,25 +77,25 @@ namespace ECommerce.DataAccess.EntityFramework
                 if (context.SaveChanges() > 0)
                 {
                     Product product = new Product
-                {
-                    Name = "Product 1",
-                    Price = 4.95m,
-                    Description = "Product Description 1",
-                    CreatedOnUtc = DateTime.Now,
-                    Deleted = false,
-                    DisplayOrder = 1,
-                    Gtin = "123",
-                    MinStockQuantity = 1,
-                    OldPrice = 10.0m,
-                    Published = true,
-                    Sku = "G1234",
-                    StockQuantity = 5,
-                    UpdatedOnUtc = DateTime.Now,
-                    CategoryId = category.Id,
-                    Category = category
-                };
+                    {
+                        Name = "Product 1",
+                        Price = 4.95m,
+                        Description = "Product Description 1",
+                        CreatedOnUtc = DateTime.Now,
+                        Deleted = false,
+                        DisplayOrder = 1,
+                        Gtin = "123",
+                        MinStockQuantity = 1,
+                        OldPrice = 10.0m,
+                        Published = true,
+                        Sku = "G1234",
+                        StockQuantity = 10,
+                        UpdatedOnUtc = DateTime.Now,
+                        CategoryId = category.Id,
+                        Category = category
+                    };
 
-                context.Products.Add(product);
+                    context.Products.Add(product);
                     context.SaveChanges();
                 }
             }

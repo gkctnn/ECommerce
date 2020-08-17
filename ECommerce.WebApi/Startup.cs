@@ -87,6 +87,10 @@ namespace ECommerce.WebApi
 
             SeedDb.Initialize(app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider).Wait();
 
+            app.UseCors(builder => 
+                builder.AllowAnyOrigin() //TODO
+            );
+
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
