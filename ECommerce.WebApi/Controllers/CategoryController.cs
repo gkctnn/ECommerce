@@ -3,6 +3,7 @@ using ECommerce.Entities.Domain.Catalog;
 using ECommerce.WebApi.Filters.Domain.Catalog;
 using ECommerce.WebApi.Models;
 using ECommerce.WebApi.Models.Domain.Catalog;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -10,6 +11,7 @@ namespace ECommerce.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
@@ -49,6 +51,7 @@ namespace ECommerce.WebApi.Controllers
         [HttpPost]
         [CategoryException]
         [CategoryValidate]
+        [Authorize(Roles = "admin")]
         public IActionResult Post([FromBody] CategoryModel model)
         {
             Category category = new Category
@@ -73,6 +76,7 @@ namespace ECommerce.WebApi.Controllers
         [HttpPut]
         [CategoryException]
         [CategoryValidate]
+        [Authorize(Roles = "admin")]
         public IActionResult Put(int id, [FromBody] CategoryModel model)
         {
             ServiceResponse<Category> response = new ServiceResponse<Category>();
@@ -102,6 +106,7 @@ namespace ECommerce.WebApi.Controllers
 
         [HttpDelete]
         [CategoryException]
+        [Authorize(Roles = "admin")]
         public IActionResult Delete(int id)
         {
             ServiceResponse<Category> response = new ServiceResponse<Category>();
@@ -111,7 +116,7 @@ namespace ECommerce.WebApi.Controllers
             if (category == null)
             {
                 response.HasError = true;
-                response.Errors.Add("Categor Does Not Exist!");
+                response.Errors.Add("Category Does Not Exist!");
 
                 return BadRequest(response);
             }

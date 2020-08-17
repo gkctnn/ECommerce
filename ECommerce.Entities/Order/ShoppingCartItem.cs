@@ -10,7 +10,7 @@ namespace ECommerce.Entities.Order
         /// <summary>
         /// Gets or sets the customer identifier
         /// </summary>
-        public int CustomerId { get; set; }
+        public string CustomerUserName { get; set; }
 
         /// <summary>
         /// Gets or sets the product identifier

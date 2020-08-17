@@ -1,5 +1,6 @@
 ﻿using ECommerce.Core.Entities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -13,6 +14,7 @@ namespace ECommerce.Core.Dal
         void Insert(T entity);
         void Update(T entity);
         void Delete(T entity);
+        void DeleteAll(List<T> entities);
         int Save();
     }
 }

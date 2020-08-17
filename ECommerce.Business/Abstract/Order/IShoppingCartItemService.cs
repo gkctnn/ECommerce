@@ -10,8 +10,8 @@ namespace ECommerce.Business.Abstract.Order
         List<ShoppingCartItem> GetAll();
         List<ShoppingCartItem> GetEx(Expression<Func<ShoppingCartItem, bool>> predicate);
         ShoppingCartItem GetById(int id);
-        void Insert(ShoppingCartItem entity);
-        void Update(ShoppingCartItem entity);
-        void Delete(ShoppingCartItem entity);
+        void AddToCart(string customerUsername, ShoppingCartItem entity);
+        void RemoveFromCart(ShoppingCartItem entity);
+        void ClearCart(List<ShoppingCartItem> entities);
     }
 }

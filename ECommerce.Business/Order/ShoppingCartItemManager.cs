@@ -5,20 +5,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Linq;
+using ECommerce.DataAccess.Abstract.Domain.Catalog;
 
 namespace ECommerce.Business.Order
 {
     public class ShoppingCartItemManager : IShoppingCartItemService
     {
         IShoppingCartItemRepository _shoppingCartItemRepository;
-        public ShoppingCartItemManager(IShoppingCartItemRepository shoppingCartItemRepository)
+        IProductRepository _productRepository;
+        public ShoppingCartItemManager(IShoppingCartItemRepository shoppingCartItemRepository, IProductRepository productRepository)
         {
             _shoppingCartItemRepository = shoppingCartItemRepository;
+            _productRepository = productRepository;
         }
 
-        public void Delete(ShoppingCartItem entity)
+        public void ClearCart(List<ShoppingCartItem> entities)
         {
-            _shoppingCartItemRepository.Delete(entity);
+            _shoppingCartItemRepository.DeleteAll(entities);
         }
 
         public List<ShoppingCartItem> GetAll()
@@ -36,14 +39,38 @@ namespace ECommerce.Business.Order
             return _shoppingCartItemRepository.GetEx(predicate).ToList();
         }
 
-        public void Insert(ShoppingCartItem entity)
+        public void AddToCart(string customerUsername, ShoppingCartItem entity)
         {
-            _shoppingCartItemRepository.Insert(entity);
+            var product = _productRepository.GetById(entity.ProductId);
+
+            product.StockQuantity -= entity.Quantity;
+            _productRepository.Update(product);
+
+            var shoppingCartItem = _shoppingCartItemRepository.GetEx(s => s.CustomerUserName == customerUsername && s.ProductId == entity.ProductId).FirstOrDefault();
+
+            if (shoppingCartItem == null)
+            {
+                _shoppingCartItemRepository.Insert(entity);
+            }
+            else
+            {
+                shoppingCartItem.Quantity += entity.Quantity;
+                _shoppingCartItemRepository.Update(entity);
+            }
         }
 
-        public void Update(ShoppingCartItem entity)
+        public void RemoveFromCart(ShoppingCartItem entity)
         {
-            _shoppingCartItemRepository.Update(entity);
+            if (entity.Quantity > 1)
+            {
+                entity.Quantity--;
+
+                _shoppingCartItemRepository.Update(entity);
+            }
+            else
+            {
+                _shoppingCartItemRepository.Delete(entity);
+            }
         }
     }
 }

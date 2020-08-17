@@ -1,26 +1,35 @@
-﻿using ECommerce.Business.Abstract.Order;
+﻿using ECommerce.Business.Abstract.Domain.Catalog;
+using ECommerce.Business.Abstract.Order;
 using ECommerce.Entities.Order;
 using ECommerce.WebApi.Filters.Order;
 using ECommerce.WebApi.Models;
 using ECommerce.WebApi.Models.Order;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ECommerce.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class ShoppingCartItemController : ControllerBase
     {
         private readonly IShoppingCartItemService _shoppingCartItemService;
+        private readonly IProductService _productService;
+        //private UserManager<Customer> _userManager;
 
-        public ShoppingCartItemController(IShoppingCartItemService shoppingCartItemService)
+        public ShoppingCartItemController(IShoppingCartItemService shoppingCartItemService, IProductService productService/*, UserManager<Customer> userManager*/)
         {
             _shoppingCartItemService = shoppingCartItemService;
+            _productService = productService;
+            //_userManager = userManager;
         }
 
         [HttpGet]
         [ShoppingCartItemException]
+        //[Authorize(Roles = "admin")]
+        //tüm kullanıcılara ait sepetler
         public IActionResult Get()
         {
             ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>
@@ -33,15 +42,26 @@ namespace ECommerce.WebApi.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{customerUsername}")]
         [ShoppingCartItemException]
-        public IActionResult Get(int id)
+        //[Authorize(Roles = "admin, customer")]
+        //ilgili kullanıcıya ait sepet
+        public IActionResult Get(string customerUsername)
         {
-            ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>
-            {
-                Entity = _shoppingCartItemService.GetById(id),
-                IsSuccess = true
-            };
+            ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
+
+            //var customer = _userManager.FindByNameAsync(customerUsername);
+
+            //if (customer == null)
+            //{
+            //    response.HasError = true;
+            //    response.Errors.Add("Customer Does Not Exist!");
+
+            //    return BadRequest(response);
+            //}
+
+            response.Entities = _shoppingCartItemService.GetEx(s => s.CustomerUserName == customerUsername);
+            response.IsSuccess = true;
 
             return Ok(response);
         }
@@ -49,22 +69,64 @@ namespace ECommerce.WebApi.Controllers
         [HttpPost]
         [ShoppingCartItemException]
         [ShoppingCartItemValidate]
+        //[Authorize(Roles = "admin, customer")]
+        //sepete ürün ekleme
         public IActionResult Post([FromBody] ShoppingCartItemModel model)
         {
+            ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
+
+            //var customer = _userManager.FindByNameAsync(customerUsername);
+
+            //if (customer == null)
+            //{
+            //    response.HasError = true;
+            //    response.Errors.Add("Customer Does Not Exist!");
+
+            //    return BadRequest(response);
+            //}
+
+            var selectedProduct = _productService.GetById(model.ProductId);
+
+            if (selectedProduct == null)
+            {
+                response.HasError = true;
+                response.Errors.Add("Selected Product Does Not Exist!");
+
+                return BadRequest(response);
+            }
+            else if (selectedProduct.Deleted || !selectedProduct.Published)
+            {
+                response.HasError = true;
+                response.Errors.Add("Selected Product Does Not Publish!");
+
+                return BadRequest(response);
+            }
+            else if (selectedProduct.StockQuantity <= 0 || selectedProduct.StockQuantity <= selectedProduct.MinStockQuantity)
+            {
+                response.HasError = true;
+                response.Errors.Add("Selected Product Has No Stock!");
+
+                return BadRequest(response);
+            }
+            else if (selectedProduct.StockQuantity - model.Quantity <= selectedProduct.MinStockQuantity)
+            {
+                response.HasError = true;
+                response.Errors.Add("Stock Of Selected Product Is Not Enough!");
+
+                return BadRequest(response);
+            }
+
             ShoppingCartItem shoppingCartItem = new ShoppingCartItem
             {
-                CustomerId = model.CustomerId,
+                CustomerUserName = model.CustomerUsername,
                 ProductId = model.ProductId,
                 Quantity = model.Quantity
             };
 
-            _shoppingCartItemService.Insert(shoppingCartItem);
+            _shoppingCartItemService.AddToCart(model.CustomerUsername, shoppingCartItem);
 
-            ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>
-            {
-                Entity = _shoppingCartItemService.GetById(shoppingCartItem.Id),
-                IsSuccess = true
-            };
+            response.Entity = _shoppingCartItemService.GetById(shoppingCartItem.Id);
+            response.IsSuccess = true;
 
             return Ok(response);
         }
@@ -72,9 +134,28 @@ namespace ECommerce.WebApi.Controllers
         [HttpPut]
         [ShoppingCartItemException]
         [ShoppingCartItemValidate]
+        //[Authorize(Roles = "admin, customer")]
+        //sepetten ürün çıkarma
         public IActionResult Put(int id, [FromBody] ShoppingCartItemModel model)
         {
             ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
+
+            var selectedProduct = _productService.GetById(model.ProductId);
+
+            if (selectedProduct == null)
+            {
+                response.HasError = true;
+                response.Errors.Add("Selected Product Does Not Exist!");
+
+                return BadRequest(response);
+            }
+            else if (selectedProduct.Deleted || !selectedProduct.Published)
+            {
+                response.HasError = true;
+                response.Errors.Add("Selected Product Does Not Publish!");
+
+                return BadRequest(response);
+            }
 
             ShoppingCartItem shoppingCartItem = _shoppingCartItemService.GetById(id);
 
@@ -86,11 +167,7 @@ namespace ECommerce.WebApi.Controllers
                 return BadRequest(response);
             }
 
-            shoppingCartItem.CustomerId = model.CustomerId;
-            shoppingCartItem.ProductId = model.ProductId;
-            shoppingCartItem.Quantity = model.Quantity;
-
-            _shoppingCartItemService.Update(shoppingCartItem);
+            _shoppingCartItemService.RemoveFromCart(shoppingCartItem);
 
             response.Entity = _shoppingCartItemService.GetById(id);
             response.IsSuccess = true;
@@ -100,23 +177,34 @@ namespace ECommerce.WebApi.Controllers
 
         [HttpDelete]
         [ShoppingCartItemException]
-        public IActionResult Delete(int id)
+        //[Authorize(Roles = "admin, customer")]
+        //sepeti boşaltma
+        public IActionResult Delete(string customerUsername)
         {
             ServiceResponse<ShoppingCartItem> response = new ServiceResponse<ShoppingCartItem>();
 
-            ShoppingCartItem shoppingCartItem = _shoppingCartItemService.GetById(id);
+            //var customer = _userManager.FindByNameAsync(customerUsername);
 
-            if (shoppingCartItem == null)
+            //if (customer == null)
+            //{
+            //    response.HasError = true;
+            //    response.Errors.Add("Customer Does Not Exist!");
+
+            //    return BadRequest(response);
+            //}
+
+            List<ShoppingCartItem> shoppingCartItem = _shoppingCartItemService.GetEx(s => s.CustomerUserName == customerUsername).ToList();
+
+            if (shoppingCartItem == null || shoppingCartItem.Any())
             {
                 response.HasError = true;
-                response.Errors.Add("Categor Does Not Exist!");
+                response.Errors.Add("Shopping Cart Item Does Not Exist!");
 
                 return BadRequest(response);
             }
 
-            _shoppingCartItemService.Delete(shoppingCartItem);
+            _shoppingCartItemService.ClearCart(shoppingCartItem);
 
-            response.Entity = _shoppingCartItemService.GetById(id);
             response.IsSuccess = true;
 
             return Ok(response);

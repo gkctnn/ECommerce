@@ -2,6 +2,7 @@
 using ECommerce.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -21,6 +22,15 @@ namespace ECommerce.Core.EntityFramework
         {
             entity.Deleted = true;
             Update(entity);
+        }
+
+        public void DeleteAll(List<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                entity.Deleted = true;
+                Update(entity);
+            }            
         }
 
         public IQueryable<TEntity> GetAll()

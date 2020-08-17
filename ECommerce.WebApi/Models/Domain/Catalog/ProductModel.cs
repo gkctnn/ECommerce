@@ -10,18 +10,18 @@ namespace ECommerce.WebApi.Models.Domain.Catalog
         [Required(ErrorMessage = "Description Is Required")]
         public string Description { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Price Is Required")]
         public decimal Price { get; set; }
 
         public decimal OldPrice { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Sku Is Required")]
         public string Sku { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Gtin Is Required")]
         public string Gtin { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Stock Quantity Is Required")]
         public int StockQuantity { get; set; }
 
         public int MinStockQuantity { get; set; }
@@ -30,7 +30,7 @@ namespace ECommerce.WebApi.Models.Domain.Catalog
 
         public bool Published { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Category Id Is Required")]
         public int CategoryId { get; set; }
     }
 }

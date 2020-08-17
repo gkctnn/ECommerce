@@ -1,16 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ECommerce.Entities.Domain.Catalog;
+using System.ComponentModel.DataAnnotations;
 
 namespace ECommerce.WebApi.Models.Order
 {
     public class ShoppingCartItemModel
     {
-        [Required(ErrorMessage = "Name Is Required")]
-        public int CustomerId { get; set; }
+        [Required(ErrorMessage = "Customer Username Is Required")]
+        public string CustomerUsername { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Product Id Is Required")]
         public int ProductId { get; set; }
 
-        [Required(ErrorMessage = "Name Is Required")]
+        [Required(ErrorMessage = "Quantity Is Required")]
+        [Range(1, int.MaxValue)]
         public int Quantity { get; set; }
     }
 }

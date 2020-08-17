@@ -13,6 +13,11 @@ using ECommerce.DataAccess.Abstract.Domain.Catalog;
 using ECommerce.DataAccess.EntityFramework.Domain.Catalog;
 using ECommerce.DataAccess.EntityFramework.Order;
 using ECommerce.DataAccess.Abstract.Order;
+using Microsoft.IdentityModel.Tokens;
+using ECommerce.Entities.Customer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 
 namespace ECommerce.WebApi
 {
@@ -36,6 +41,30 @@ namespace ECommerce.WebApi
                 )
             );
 
+            services.AddIdentity<Customer, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
+                {
+                    options.SaveToken = true;
+                    options.RequireHttpsMetadata = true;
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "https://localhost:44318",
+                        ValidateAudience = true,
+                        ValidAudience = "https://localhost:44318",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ECommerceApiAuthentication"))
+                    };
+                });
+
             services.AddTransient<ICategoryService, CategoryManager>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IProductService, ProductManager>();
@@ -56,8 +85,9 @@ namespace ECommerce.WebApi
                 app.UseHsts();
             }
 
-            SeedDb.Initialize(app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider);
+            SeedDb.Initialize(app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider).Wait();
 
+            app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
         }

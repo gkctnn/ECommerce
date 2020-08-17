@@ -3,14 +3,15 @@ using ECommerce.Entities.Domain.Catalog;
 using ECommerce.WebApi.Filters.Domain.Catalog;
 using ECommerce.WebApi.Models;
 using ECommerce.WebApi.Models.Domain.Catalog;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq;
 
 namespace ECommerce.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -50,6 +51,7 @@ namespace ECommerce.WebApi.Controllers
         [HttpPost]
         [ProductException]
         [ProductValidate]
+        [Authorize(Roles = "admin")]
         public IActionResult Post([FromBody] ProductModel model)
         {
             Product product = new Product
@@ -81,6 +83,7 @@ namespace ECommerce.WebApi.Controllers
         [HttpPut]
         [ProductException]
         [ProductValidate]
+        [Authorize(Roles = "admin")]
         public IActionResult Put(int id, [FromBody] ProductModel model)
         {
             ServiceResponse<Product> response = new ServiceResponse<Product>();
@@ -117,6 +120,7 @@ namespace ECommerce.WebApi.Controllers
 
         [HttpDelete]
         [ProductException]
+        [Authorize(Roles = "admin")]
         public IActionResult Delete(int id)
         {
             ServiceResponse<Product> response = new ServiceResponse<Product>();
@@ -126,7 +130,7 @@ namespace ECommerce.WebApi.Controllers
             if (product == null)
             {
                 response.HasError = true;
-                response.Errors.Add("Categor Does Not Exist!");
+                response.Errors.Add("Product Does Not Exist!");
 
                 return BadRequest(response);
             }
