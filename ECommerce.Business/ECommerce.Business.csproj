@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ECommerce.DataAccess\ECommerce.DataAccess.csproj" />
+    <ProjectReference Include="..\ECommerce.Entities\ECommerce.Entities.csproj" />
+  </ItemGroup>
+
+</Project>
