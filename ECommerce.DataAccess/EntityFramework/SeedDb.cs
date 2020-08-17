@@ -96,6 +96,28 @@ namespace ECommerce.DataAccess.EntityFramework
                     };
 
                     context.Products.Add(product);
+
+                    Product product2 = new Product
+                    {
+                        Name = "Product 2",
+                        Price = 5.95m,
+                        Description = "Product Description 2",
+                        CreatedOnUtc = DateTime.Now,
+                        Deleted = false,
+                        DisplayOrder = 2,
+                        Gtin = "234",
+                        MinStockQuantity = 1,
+                        OldPrice = 10.0m,
+                        Published = true,
+                        Sku = "G2345",
+                        StockQuantity = 10,
+                        UpdatedOnUtc = DateTime.Now,
+                        CategoryId = category.Id,
+                        Category = category
+                    };
+
+                    context.Products.Add(product2);
+
                     context.SaveChanges();
                 }
             }

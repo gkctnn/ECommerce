@@ -54,7 +54,6 @@ namespace ECommerce.Business.Order
             }
             else
             {
-                shoppingCartItem.Quantity += entity.Quantity;
                 _shoppingCartItemRepository.Update(entity);
             }
         }

@@ -94,16 +94,29 @@ namespace ECommerce.WebApi.Controllers
                 return BadRequest(response);
             }
 
-            ShoppingCartItem shoppingCartItem = new ShoppingCartItem
+            var shoppingCartItem = _shoppingCartItemService.GetEx(s => s.CustomerUserName == model.CustomerUsername && s.ProductId == model.ProductId).FirstOrDefault();
+
+            if (shoppingCartItem == null)
             {
-                CustomerUserName = model.CustomerUsername,
-                ProductId = model.ProductId,
-                Quantity = model.Quantity
-            };
+                ShoppingCartItem newShoppingCartItem = new ShoppingCartItem
+                {
+                    CustomerUserName = model.CustomerUsername,
+                    ProductId = model.ProductId,
+                    Quantity = model.Quantity
+                };
 
-            _shoppingCartItemService.AddToCart(model.CustomerUsername, shoppingCartItem);
+                _shoppingCartItemService.AddToCart(model.CustomerUsername, newShoppingCartItem);
 
-            response.Entity = _shoppingCartItemService.GetById(shoppingCartItem.Id);
+                response.Entity = _shoppingCartItemService.GetById(newShoppingCartItem.Id);
+            }
+            else
+            {
+                shoppingCartItem.Quantity += model.Quantity;
+                _shoppingCartItemService.AddToCart(model.CustomerUsername, shoppingCartItem);
+
+                response.Entity = _shoppingCartItemService.GetById(shoppingCartItem.Id);
+            }
+
             response.IsSuccess = true;
 
             return Ok(response);
